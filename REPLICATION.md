@@ -138,9 +138,15 @@ embedded cells (base64), so it needs no GitHub clone, and is driven by a single
   writes to a separate `*_smoke` results directory, so a smoke run can never be
   mistaken for a real one. Set it to `False` for everything below.
 * `MODE = "baselines"` — train the tiered run matrix. Resumable across Kaggle's
-  ~9-hour cap: attach the previous session's *output* as an input dataset and set
+  ~12-hour cap: attach the previous session's *output* as an input dataset and set
   `PREV_RESULTS` so finished runs and mid-run `last.pth` checkpoints continue.
-  Pick `TIERS`, `SEEDS`, `EPOCHS`, `USE_AMP`, and a `MAX_MINUTES` budget guard.
+  Pick `TIERS`, `SIZES`, `SEEDS`, `EPOCHS`, `USE_AMP`, and a `MAX_MINUTES` guard.
+
+  The shipped default is `TIERS=[1,2,3]`, `SIZES=[28]`, `SEEDS=[0,1,2]` — **31
+  runs, ≈8–10 GPU-hours**, i.e. breadth at 28×28 across all twelve datasets.
+  `SIZES=[28]` drops the 224 configs, which cost ~25 GPU-h alone and are already
+  covered for DermaMNIST by the reproduction arm (`report/reproduction_arm.md`).
+  Set `SIZES=[28, 224]` only to replicate the 224 column with our own code too.
 * `MODE = "extensions"` — per-class analysis, bias mitigation (weighted
   sampler + weighted loss), and the lightweight 0.5× variant on DermaMNIST.
 * `MODE = "report"` — aggregate all `run.json` into `report/comparison.{csv,md}`
