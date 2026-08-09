@@ -1,7 +1,7 @@
 # Independent replication of the MedMNIST v2 ResNet baselines
 
 This directory (`src/`, `configs/`, `report/`, `results/`, plus the Kaggle
-notebooks in `kaggle_notebooks/`) is an **independent reimplementation** of the
+notebook in `notebooks/replication/`) is an **independent reimplementation** of the
 ResNet baselines from MedMNIST v2 (Yang et al., *Scientific Data* 2023,
 <https://doi.org/10.1038/s41597-022-01721-8>), written for a ReScience C
 *replication* (not a *reproduction* of the authors' own scripts).
@@ -44,10 +44,21 @@ src/
   plotting.py    # shared figure style: colorblind palette, clean defaults, PDF+PNG saver
   figures_replication.py  # the ReScience figures, generated from results/ alone
   extensions.py  # per-class analysis, bias mitigation comparison, lightweight profiling
+  from_predictions.py     # recompute prediction-only extensions from a score CSV (no GPU)
+  reproduction_arm.py     # the separate authors'-code arm + its provenance manifest
 configs/matrix.json   # enumerated tiered run matrix (~37 runs)
-results/<run_name>/    # per run: best_model.pth, last.pth, predictions csv, run.json
+tools/sync_notebook_src.py  # keeps the notebook's embedded src/ copy in sync
+results/replication/<run_name>/  # per run: best_model.pth, last.pth, predictions csv, run.json
+results/reproduction_authors_code/  # frozen artifacts from the authors'-code arm
+results/extensions_prior/           # frozen seed-0 equity pass (pre-src/)
 report/                # comparison.csv + comparison.md + figures/ (PDF + 300-dpi PNG)
 ```
+
+**Two arms.** Everything above is the *replication* arm. Runs executed with the
+authors' own `train_and_eval_pytorch.py` are a separate *reproduction* arm,
+tabulated by `python -m src.reproduction_arm` into `report/reproduction_arm.md`.
+`src.aggregate` reads only `run.json` files written by our pipeline, so the two
+can never be pooled. See `notebooks/README.md` for the provenance of each.
 
 ## Reproduce a single run
 
@@ -56,17 +67,17 @@ pip install -r requirements-replication.txt   # or: conda env create -f environm
 
 # DermaMNIST, ResNet-18, size 28, seed 0 (should land near AUC 0.917 / ACC 0.735)
 python -m src.run --dataset dermamnist --model resnet18 --size 28 --seed 0 \
-    --epochs 100 --results-dir results
+    --epochs 100 --results-dir results/replication
 
 # ResNet-50 at 224 with mixed precision + checkpoint every 5 epochs (Kaggle-friendly)
 python -m src.run --dataset dermamnist --model resnet50 --size 224 --seed 0 \
-    --epochs 100 --amp --ckpt-every 5 --results-dir results
+    --epochs 100 --amp --ckpt-every 5 --results-dir results/replication
 
-# resume automatically continues from results/<run_name>/last.pth
+# resume automatically continues from results/replication/<run_name>/last.pth
 python -m src.run --dataset pathmnist --model resnet50 --size 224 --seed 0 --amp
 ```
 
-Each run writes `results/<run_name>/run.json` with the full config, final
+Each run writes `results/replication/<run_name>/run.json` with the full config, final
 train/val/test AUC+ACC, best epoch, wall-clock time, seed, whether cudnn was
 deterministic / AMP was used, and pinned versions of
 python/torch/torchvision/medmnist/numpy/scikit-learn.
@@ -84,7 +95,8 @@ within `1e-3`, and is called automatically at the end of every run.
 ## Aggregate results vs the paper
 
 ```bash
-python -m src.aggregate results   # writes report/comparison.{csv,md}
+python -m src.aggregate results/replication   # writes report/comparison.{csv,md}
+python -m src.reproduction_arm               # writes report/reproduction_arm.{csv,md}
 ```
 
 Tolerances (definition of done): |ΔAUC| ≤ 0.02, |ΔACC| ≤ 0.03. Any config
@@ -116,7 +128,7 @@ into `report/figures/` and writes `report/extension.md`.
 ## Kaggle
 
 **One self-contained notebook** produces every result and figure for the paper:
-`kaggle_notebooks/medmnist_replication.ipynb`. It writes the `src/` package from
+`notebooks/replication/medmnist_replication.ipynb`. It writes the `src/` package from
 embedded cells (base64), so it needs no GitHub clone, and is driven by a single
 `CONFIG` cell:
 
