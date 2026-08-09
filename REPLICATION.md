@@ -132,7 +132,7 @@ into `report/figures/` and writes `report/extension.md`.
 embedded cells (base64), so it needs no GitHub clone, and is driven by a single
 `CONFIG` cell:
 
-* `SMOKE = True` (the shipped default) — 3 epochs, seed 0, DermaMNIST @28 only.
+* `SMOKE` (shipped as `False`) — set it to `True` for 3 epochs, seed 0, DermaMNIST @28 only.
   ~2 minutes, and it exercises the whole path (download → model → training loop →
   metric oracle → `run.json`) before any GPU quota goes into 100-epoch runs. It
   writes to a separate `*_smoke` results directory, so a smoke run can never be

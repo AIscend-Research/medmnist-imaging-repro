@@ -94,8 +94,10 @@ python -m src.reproduction_arm                   # -> report/reproduction_arm.{c
 ```
 
 On Kaggle, use [`notebooks/replication/medmnist_replication.ipynb`](notebooks/replication/medmnist_replication.ipynb).
-It ships with `SMOKE = True` — leave it on for the first run, then set it to
-`False`. Because a 12-hour session cannot train the whole matrix, run
+It ships with `SMOKE = False` (real runs). Flipping `SMOKE = True` gives a
+3-epoch, seed-0, DermaMNIST-@28-only pass in ~2 minutes that writes to a
+separate `*_smoke` directory — worth one run on a fresh Kaggle setup before
+spending quota. Because a 12-hour session cannot train the whole matrix, run
 `MODE="baselines"` over several sessions (chaining each session's *output* into
 the next as `PREV_RESULTS`), then `MODE="extensions"` once, then `MODE="report"`
 once. Finished runs and mid-run checkpoints both resume, so a session hitting
