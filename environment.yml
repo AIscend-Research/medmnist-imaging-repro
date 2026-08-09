@@ -1,0 +1,23 @@
+name: medmnist-replication
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip=24.0
+  - pip:
+      # Pinned for reproducibility. run.json records the ACTUAL versions used at
+      # runtime (the source of truth); these are the set we validated against.
+      - torch==2.2.2
+      - torchvision==0.17.2
+      - numpy==1.26.4
+      - scipy==1.13.0
+      - scikit-learn==1.4.2
+      - scikit-image==0.22.0
+      - pandas==2.2.2
+      - tabulate==0.9.0
+      - matplotlib==3.8.4
+      - Pillow==10.3.0
+      - tqdm==4.66.4
+      - medmnist==3.0.2
