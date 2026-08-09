@@ -137,3 +137,7 @@ dmypy.json
 results/**/experiments/
 # Large / regenerable model checkpoints (kept out of git; recreate via src.run)
 *.pth
+
+# Smoke-test output (throwaway; never part of the reported results)
+results/*_smoke/
+results/replication_smoke/
