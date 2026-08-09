@@ -94,14 +94,17 @@ python -m src.reproduction_arm                   # -> report/reproduction_arm.{c
 ```
 
 On Kaggle, use [`notebooks/replication/medmnist_replication.ipynb`](notebooks/replication/medmnist_replication.ipynb).
-It ships with `SMOKE = False` (real runs). Flipping `SMOKE = True` gives a
-3-epoch, seed-0, DermaMNIST-@28-only pass in ~2 minutes that writes to a
-separate `*_smoke` directory — worth one run on a fresh Kaggle setup before
-spending quota. Because a 12-hour session cannot train the whole matrix, run
-`MODE="baselines"` over several sessions (chaining each session's *output* into
-the next as `PREV_RESULTS`), then `MODE="extensions"` once, then `MODE="report"`
-once. Finished runs and mid-run checkpoints both resume, so a session hitting
-the wall costs at most a few epochs.
+Enable **GPU T4 x2** and **Internet**, and use *Save & Run All (Commit)* so the
+output persists. The shipped config — `TIERS=[1,2,3]`, `SIZES=[28]`,
+`SEEDS=[0,1,2]` — is **31 runs, ≈8–10 GPU-hours**: breadth at 28×28 across all
+twelve datasets, with the ~25 GPU-h of 224 configs left to the reproduction arm.
+Then `MODE="extensions"` (~1.5–2 h) and `MODE="report"` (minutes).
+
+Flipping `SMOKE = True` first gives a 3-epoch, seed-0, DermaMNIST-@28-only pass
+in ~2 minutes, writing to a separate `*_smoke` directory — worth one run on a
+fresh setup before spending quota. If a session hits the wall, attach its
+*output* as the next session's input and set `PREV_RESULTS`: finished runs skip
+and mid-run checkpoints resume, so at most a few epochs are lost.
 
 ## Extensions
 
