@@ -132,3 +132,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# ReScience hard rule: never vendor the authors' experiments repo
+results/**/experiments/
+# Large / regenerable model checkpoints (kept out of git; recreate via src.run)
+*.pth

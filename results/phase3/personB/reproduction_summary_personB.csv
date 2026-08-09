@@ -1,0 +1,2 @@
+Config,AUC (paper),AUC (ours),AUC diff,Acc (paper),Acc (ours),Acc diff
+"ResNet-50, DermaMNIST, --resize",0.912,0.9119,-0.0001,0.731,0.7377,0.0067

@@ -1,0 +1,307 @@
+{
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "description": "Compute-minimal slice of MedMNIST v2 Table 3: R18@28 across all twelve 2D datasets + DermaMNIST four-config matrix. T1=DermaMNIST(4 configs,3 seeds); T2=7 small/medium(R18@28,3 seeds); T3=4 large(R18@28,seed 0).",
+  "n_runs": 37,
+  "runs": [
+    {
+      "tier": 1,
+      "dataset": "dermamnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 0,
+      "run_name": "dermamnist_resnet18_s28_seed0"
+    },
+    {
+      "tier": 1,
+      "dataset": "dermamnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 1,
+      "run_name": "dermamnist_resnet18_s28_seed1"
+    },
+    {
+      "tier": 1,
+      "dataset": "dermamnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 2,
+      "run_name": "dermamnist_resnet18_s28_seed2"
+    },
+    {
+      "tier": 1,
+      "dataset": "dermamnist",
+      "model": "resnet18",
+      "size": 224,
+      "seed": 0,
+      "run_name": "dermamnist_resnet18_s224_seed0"
+    },
+    {
+      "tier": 1,
+      "dataset": "dermamnist",
+      "model": "resnet18",
+      "size": 224,
+      "seed": 1,
+      "run_name": "dermamnist_resnet18_s224_seed1"
+    },
+    {
+      "tier": 1,
+      "dataset": "dermamnist",
+      "model": "resnet18",
+      "size": 224,
+      "seed": 2,
+      "run_name": "dermamnist_resnet18_s224_seed2"
+    },
+    {
+      "tier": 1,
+      "dataset": "dermamnist",
+      "model": "resnet50",
+      "size": 28,
+      "seed": 0,
+      "run_name": "dermamnist_resnet50_s28_seed0"
+    },
+    {
+      "tier": 1,
+      "dataset": "dermamnist",
+      "model": "resnet50",
+      "size": 28,
+      "seed": 1,
+      "run_name": "dermamnist_resnet50_s28_seed1"
+    },
+    {
+      "tier": 1,
+      "dataset": "dermamnist",
+      "model": "resnet50",
+      "size": 28,
+      "seed": 2,
+      "run_name": "dermamnist_resnet50_s28_seed2"
+    },
+    {
+      "tier": 1,
+      "dataset": "dermamnist",
+      "model": "resnet50",
+      "size": 224,
+      "seed": 0,
+      "run_name": "dermamnist_resnet50_s224_seed0"
+    },
+    {
+      "tier": 1,
+      "dataset": "dermamnist",
+      "model": "resnet50",
+      "size": 224,
+      "seed": 1,
+      "run_name": "dermamnist_resnet50_s224_seed1"
+    },
+    {
+      "tier": 1,
+      "dataset": "dermamnist",
+      "model": "resnet50",
+      "size": 224,
+      "seed": 2,
+      "run_name": "dermamnist_resnet50_s224_seed2"
+    },
+    {
+      "tier": 2,
+      "dataset": "retinamnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 0,
+      "run_name": "retinamnist_resnet18_s28_seed0"
+    },
+    {
+      "tier": 2,
+      "dataset": "retinamnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 1,
+      "run_name": "retinamnist_resnet18_s28_seed1"
+    },
+    {
+      "tier": 2,
+      "dataset": "retinamnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 2,
+      "run_name": "retinamnist_resnet18_s28_seed2"
+    },
+    {
+      "tier": 2,
+      "dataset": "breastmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 0,
+      "run_name": "breastmnist_resnet18_s28_seed0"
+    },
+    {
+      "tier": 2,
+      "dataset": "breastmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 1,
+      "run_name": "breastmnist_resnet18_s28_seed1"
+    },
+    {
+      "tier": 2,
+      "dataset": "breastmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 2,
+      "run_name": "breastmnist_resnet18_s28_seed2"
+    },
+    {
+      "tier": 2,
+      "dataset": "pneumoniamnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 0,
+      "run_name": "pneumoniamnist_resnet18_s28_seed0"
+    },
+    {
+      "tier": 2,
+      "dataset": "pneumoniamnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 1,
+      "run_name": "pneumoniamnist_resnet18_s28_seed1"
+    },
+    {
+      "tier": 2,
+      "dataset": "pneumoniamnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 2,
+      "run_name": "pneumoniamnist_resnet18_s28_seed2"
+    },
+    {
+      "tier": 2,
+      "dataset": "bloodmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 0,
+      "run_name": "bloodmnist_resnet18_s28_seed0"
+    },
+    {
+      "tier": 2,
+      "dataset": "bloodmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 1,
+      "run_name": "bloodmnist_resnet18_s28_seed1"
+    },
+    {
+      "tier": 2,
+      "dataset": "bloodmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 2,
+      "run_name": "bloodmnist_resnet18_s28_seed2"
+    },
+    {
+      "tier": 2,
+      "dataset": "organamnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 0,
+      "run_name": "organamnist_resnet18_s28_seed0"
+    },
+    {
+      "tier": 2,
+      "dataset": "organamnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 1,
+      "run_name": "organamnist_resnet18_s28_seed1"
+    },
+    {
+      "tier": 2,
+      "dataset": "organamnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 2,
+      "run_name": "organamnist_resnet18_s28_seed2"
+    },
+    {
+      "tier": 2,
+      "dataset": "organcmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 0,
+      "run_name": "organcmnist_resnet18_s28_seed0"
+    },
+    {
+      "tier": 2,
+      "dataset": "organcmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 1,
+      "run_name": "organcmnist_resnet18_s28_seed1"
+    },
+    {
+      "tier": 2,
+      "dataset": "organcmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 2,
+      "run_name": "organcmnist_resnet18_s28_seed2"
+    },
+    {
+      "tier": 2,
+      "dataset": "organsmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 0,
+      "run_name": "organsmnist_resnet18_s28_seed0"
+    },
+    {
+      "tier": 2,
+      "dataset": "organsmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 1,
+      "run_name": "organsmnist_resnet18_s28_seed1"
+    },
+    {
+      "tier": 2,
+      "dataset": "organsmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 2,
+      "run_name": "organsmnist_resnet18_s28_seed2"
+    },
+    {
+      "tier": 3,
+      "dataset": "tissuemnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 0,
+      "run_name": "tissuemnist_resnet18_s28_seed0"
+    },
+    {
+      "tier": 3,
+      "dataset": "octmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 0,
+      "run_name": "octmnist_resnet18_s28_seed0"
+    },
+    {
+      "tier": 3,
+      "dataset": "pathmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 0,
+      "run_name": "pathmnist_resnet18_s28_seed0"
+    },
+    {
+      "tier": 3,
+      "dataset": "chestmnist",
+      "model": "resnet18",
+      "size": 28,
+      "seed": 0,
+      "run_name": "chestmnist_resnet18_s28_seed0"
+    }
+  ]
+}
