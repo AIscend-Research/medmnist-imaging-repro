@@ -98,7 +98,9 @@ Enable **GPU T4 x2** and **Internet**, and use *Save & Run All (Commit)* so the
 output persists. The shipped config — `TIERS=[1,2,3]`, `SIZES=[28]`,
 `SEEDS=[0,1,2]` — is **31 runs, ≈8–10 GPU-hours**: breadth at 28×28 across all
 twelve datasets, with the ~25 GPU-h of 224 configs left to the reproduction arm.
-Then `MODE="extensions"` (~1.5–2 h) and `MODE="report"` (minutes).
+Then `MODE="extensions"` (~1.5–2 h) and `MODE="report"` (minutes) — or
+`MODE="all"`, which runs all three back to back in a single session once the
+baselines are mostly trained.
 
 Flipping `SMOKE = True` first gives a 3-epoch, seed-0, DermaMNIST-@28-only pass
 in ~2 minutes, writing to a separate `*_smoke` directory — worth one run on a

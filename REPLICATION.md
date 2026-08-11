@@ -130,7 +130,12 @@ into `report/figures/` and writes `report/extension.md`.
 **One self-contained notebook** produces every result and figure for the paper:
 `notebooks/replication/medmnist_replication.ipynb`. It writes the `src/` package from
 embedded cells (base64), so it needs no GitHub clone, and is driven by a single
-`CONFIG` cell:
+`CONFIG` cell.
+
+`MODE = "all"` runs baselines → extensions → report in one session, which is the
+right setting once the bulk of the matrix is already trained: one *Save & Run
+All* produces every table and figure. Use the individual modes below when a
+phase is too big to finish inside Kaggle's ~12-hour session cap.
 
 * `SMOKE` (shipped as `False`) — set it to `True` for 3 epochs, seed 0, DermaMNIST @28 only.
   ~2 minutes, and it exercises the whole path (download → model → training loop →
