@@ -1,0 +1,165 @@
+# To be filled by the author(s) at the time of submission
+# -------------------------------------------------------
+
+# Title of the article:
+#  - For a successful replication, it should be prefixed with "[Re]"
+#  - For a failed replication, it should be prefixed with "[¬Re]"
+#  - For other article types, no instruction (but please, not too long)
+title: "[Re] MedMNIST v2: Replicating the ResNet baselines and auditing what macro-AUC hides on DermaMNIST"
+
+# List of authors with name, orcid number, email and affiliation
+# Affiliation "*" means contact author (required even for single-authored papers)
+# To include author suffix format name as Last Suffix, First M.I. (e.g. Schackart III, Kenneth E.)
+authors:
+  - name: Christopher Huang
+    orcid: 0009-0004-3034-9235
+    email: wenhao@nxthorizon.org
+    affiliations: 1
+
+  - name: Ryan Ahn
+    orcid: 0009-0004-5251-6583
+    email: wenhao@nxthorizon.org
+    affiliations: 2
+
+  - name: Wenhao Lu
+    orcid: 0009-0001-6517-8745
+    email: wenhao@nxthorizon.org
+    affiliations: 3,*           # * is for contact author
+
+  - name: Spursh Deshpande
+    orcid: 0009-0002-5344-0694
+    email: wenhao@nxthorizon.org
+    affiliations: 4
+
+# List of affiliations with code (corresponding to author affiliations), name
+# and address. You can also use these affiliations to add text such as "Equal
+# contributions" as name (with no address).
+affiliations:
+  - code:    1
+    name:    Heritage High School
+    address: Brentwood, CA, United States
+
+  - code:    2
+    name:    Yongsan International School of Seoul
+    address: Seoul, South Korea
+
+  - code:    3
+    name:    Millburn High School
+    address: Millburn, NJ, United States
+
+  - code:    4
+    name:    Crescenta Valley High School
+    address: La Crescenta, CA, United States
+
+
+# List of keywords (adding the programming language might be a good idea)
+keywords: rescience c, replication, machine learning, medical imaging, benchmarking,
+          class imbalance, fairness, calibration, model compression, ResNet,
+          MedMNIST, DermaMNIST, python, pytorch
+
+# Code URL and DOI/SWH (url is mandatory for replication, doi after acceptance)
+# You can get a DOI for your code from Zenodo, or an SWH identifier from
+# Software Heritage.
+#   see https://guides.github.com/activities/citable-code/
+code:
+  - url: https://github.com/AIscend-Research/medmnist-imaging-repro
+  - doi:                        # TODO: mint on Zenodo before acceptance
+  - swh:
+
+# Data URL and DOI (optional if no data)
+data:
+  - url: https://medmnist.com
+  - doi: 10.5281/zenodo.6496656
+
+# Information about the original article that has been replicated
+replication:
+ - cite: "J. Yang, R. Shi, D. Wei, Z. Liu, L. Zhao, B. Ke, H. Pfister, and B. Ni.
+          MedMNIST v2 - A large-scale lightweight benchmark for 2D and 3D biomedical
+          image classification. Scientific Data 10, 41 (2023)."
+ - bib:  medmnistv2
+ - url:  https://pmc.ncbi.nlm.nih.gov/articles/PMC9852451/pdf/41597_2022_Article_1721.pdf
+ - doi:  10.1038/s41597-022-01721-8
+
+# Don't forget to surround abstract with double quotes
+abstract: "MedMNIST v2 is a widely used benchmark of standardized, lightweight
+           biomedical image classification datasets whose Table 3 ResNet baselines
+           anchor a large body of follow-up work. We replicate the 28-pixel ResNet
+           baselines with a from-scratch PyTorch reimplementation that shares no code
+           with the authors' experiments repository: 9 of 13 configurations land inside
+           a pre-registered tolerance of |dAUC| <= 0.02 and |dACC| <= 0.03, and all four
+           misses are analysed rather than discarded. Three of the four are
+           accuracy-only misses with AUC essentially on the paper, reflecting
+           operating-point rather than ranking disagreement; BreastMNIST, the smallest
+           dataset, shows the highest seed sensitivity in the matrix. A separate
+           reproduction arm running the authors' own script unmodified on DermaMNIST at
+           224 pixels also lands inside tolerance. We additionally record a
+           specification gap: the 28-pixel backbone is underspecified in the original
+           text, and a CIFAR-style stem rather than the stock torchvision stem is what
+           makes the numbers line up. We then extend the study with an equity audit of
+           DermaMNIST. Per-class recall correlates strongly with training frequency
+           (Pearson r = 0.81) while per-class macro-AUC does not (r = -0.28), so the
+           benchmark's headline metric is near-blind to the imbalance its own class
+           distribution creates: the baseline recalls 8.7% of dermatofibroma test cases
+           while that class's AUC reads 0.917. Expected calibration error is nearly four
+           times worse on rare classes than on common ones (0.208 vs 0.053), rare-class
+           errors collapse directionally into the 67% majority class at up to full
+           confidence, and a 4x parameter compression that leaves aggregate metrics
+           almost untouched drives the rarest class's F1 to zero. We quantify the
+           equity/accuracy tradeoffs of two standard mitigations and argue that
+           MedMNIST-style leaderboards should report per-class recall and
+           rarity-stratified calibration alongside macro-AUC."
+
+# Bibliography file (yours)
+bibliography: bibliography.bib
+
+# Type of the article
+# Type can be:
+#  * Editorial
+#  * Letter
+#  * Replication
+type: Replication
+
+# Scientific domain of the article (e.g. Computational Neuroscience)
+#  (one domain only & try to be not overly specific)
+domain: Machine Learning
+
+# Coding language (main one only if several)
+language: Python
+
+
+# To be filled by the author(s) after acceptance
+# -----------------------------------------------------------------------------
+
+# For example, the URL of the GitHub issue where review actually occured
+review:
+  - url:
+
+contributors:
+  - name:
+    orcid:
+    role: editor
+  - name:
+    orcid:
+    role: reviewer
+  - name:
+    orcid:
+    role: reviewer
+
+# This information will be provided by the editor
+dates:
+  - received:
+  - accepted:
+  - published:
+
+# This information will be provided by the editor
+article:
+  - number: # Article number will be automatically assigned during publication
+  - doi:    # DOI from Zenodo
+  - url:    # Final PDF URL (Zenodo or rescience website?)
+
+# This information will be provided by the editor
+journal:
+  - name:   "ReScience C"
+  - issn:   2430-3658
+  - volume: 12
+  - issue:  1
