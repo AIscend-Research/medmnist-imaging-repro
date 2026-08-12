@@ -474,8 +474,11 @@ def plot_misclassified_gallery(dataset, y_true, y_score, images, report_dir,
     P.set_style()
     cols = 4
     rows = int(np.ceil(max(len(pool), 1) / cols))
-    fig, axes = P.new_fig(width=P.COL_WIDTH * 2.0, ncols=cols, nrows=rows,
-                          height=P.COL_WIDTH * 0.55)
+    # new_fig multiplies width x ncols and height x nrows, so these are
+    # *per-cell* sizes: 4 x COL_WIDTH/2 = full page width, and a near-square
+    # cell so the 28x28 images fill it instead of floating in wide gutters.
+    fig, axes = P.new_fig(width=P.COL_WIDTH / 2, ncols=cols, nrows=rows,
+                          height=P.COL_WIDTH * 0.62)
     axes = np.array(axes).reshape(-1)
     for ax in axes:
         ax.axis("off")

@@ -92,7 +92,7 @@ def analyze(dataset, scores_path, out_dir, split="test", tag="recomputed",
     """
     from . import extensions as ext
     from . import metrics as mx
-    from .data import get_info
+    from .data import get_info, get_dataset
 
     os.makedirs(out_dir, exist_ok=True)
     fig_dir = os.path.join(out_dir, "figures")
@@ -142,6 +142,13 @@ def analyze(dataset, scores_path, out_dir, split="test", tag="recomputed",
         ext.plot_calibration(dataset, y_true, y_score, fig_dir,
                              stem=f"ext_calibration_{tag}",
                              root=root, download=download)
+        # The misclassification gallery needs the images themselves, not just
+        # the scores — but they come straight from the npz, so this is still
+        # GPU-free.
+        images = get_dataset(dataset, split, 28, root=root, download=download).imgs
+        ext.plot_misclassified_gallery(dataset, y_true, y_score, images, fig_dir,
+                                       stem=f"ext_misclassified_{tag}",
+                                       root=root, download=download)
         print(f"[{tag}] figures -> {fig_dir}")
 
     with open(os.path.join(out_dir, "summary.json"), "w") as f:
