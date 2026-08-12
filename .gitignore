@@ -141,3 +141,6 @@ results/**/experiments/
 # Smoke-test output (throwaway; never part of the reported results)
 results/*_smoke/
 results/replication_smoke/
+
+# Regenerable figure bundle (rebuild from report/ + results/)
+medmnist_figures_and_imaging.zip
