@@ -13,12 +13,12 @@ title: "[Re] MedMNIST v2: Replicating the ResNet baselines and auditing what mac
 authors:
   - name: Christopher Huang
     orcid: 0009-0004-3034-9235
-    email: wenhao@nxthorizon.org
+    email: chuang19543@gmail.com
     affiliations: 1
 
   - name: Ryan Ahn
     orcid: 0009-0004-5251-6583
-    email: wenhao@nxthorizon.org
+    email: ryanjmahn1@gmail.com
     affiliations: 2
 
   - name: Wenhao Lu
@@ -28,7 +28,7 @@ authors:
 
   - name: Spursh Deshpande
     orcid: 0009-0002-5344-0694
-    email: wenhao@nxthorizon.org
+    email: spursh.deshpande@gmail.com
     affiliations: 4
 
 # List of affiliations with code (corresponding to author affiliations), name
