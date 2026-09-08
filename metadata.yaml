@@ -11,11 +11,6 @@ title: "[Re] MedMNIST v2: Replicating the ResNet baselines and auditing what mac
 # Affiliation "*" means contact author (required even for single-authored papers)
 # To include author suffix format name as Last Suffix, First M.I. (e.g. Schackart III, Kenneth E.)
 authors:
-  - name: Spursh Deshpande
-    orcid: 0009-0002-5344-0694
-    email: spursh.deshpande@gmail.com
-    affiliations: 4
-
   - name: Christopher Huang
     orcid: 0009-0004-3034-9235
     email: chuang19543@gmail.com
@@ -25,6 +20,11 @@ authors:
     orcid: 0009-0004-5251-6583
     email: ryanjmahn1@gmail.com
     affiliations: 2
+
+  - name: Spursh Deshpande
+    orcid: 0009-0002-5344-0694
+    email: spursh.deshpande@gmail.com
+    affiliations: 4
 
   - name: Wenhao Lu
     orcid: 0009-0001-6517-8745
