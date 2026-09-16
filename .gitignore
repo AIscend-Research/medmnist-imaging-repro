@@ -132,3 +132,15 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# ReScience hard rule: never vendor the authors' experiments repo
+results/**/experiments/
+# Large / regenerable model checkpoints (kept out of git; recreate via src.run)
+*.pth
+
+# Smoke-test output (throwaway; never part of the reported results)
+results/*_smoke/
+results/replication_smoke/
+
+# Regenerable figure bundle (rebuild from report/ + results/)
+medmnist_figures_and_imaging.zip
