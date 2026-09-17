@@ -67,15 +67,23 @@ def evaluate(y_true, y_score, task):
     return getAUC(y_true, y_score, task), getACC(y_true, y_score, task)
 
 
-def per_class_metrics(y_true, y_score, num_classes):
+def per_class_metrics(y_true, y_score, num_classes, y_pred=None):
     """Per-class AUC / precision / recall / F1 (multi-class only).
+
+    ``y_pred`` defaults to argmax over ``y_score`` but can be supplied
+    directly (e.g. from per-class threshold tuning) so precision/recall/F1
+    reflect a different decision rule while AUC/AP still read off the
+    threshold-free scores.
 
     Returns a list of dicts, one per class. Used by the per-class extension.
     """
     from sklearn.metrics import precision_recall_fscore_support, average_precision_score
 
     y_true, y_score = _squeeze(y_true, y_score)
-    y_pred = np.argmax(y_score, axis=-1)
+    if y_pred is None:
+        y_pred = np.argmax(y_score, axis=-1)
+    else:
+        y_pred = np.asarray(y_pred).squeeze()
     precision, recall, f1, support = precision_recall_fscore_support(
         y_true, y_pred, labels=list(range(num_classes)), zero_division=0
     )

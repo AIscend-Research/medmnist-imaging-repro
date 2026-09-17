@@ -50,12 +50,13 @@ def _targets_for_loss(y, task, device):
 def train_one_epoch(model, loader, criterion, optimizer, task, device,
                     scaler=None, use_amp=False):
     model.train()
+    device_type = "cuda" if "cuda" in str(device) else "cpu"
     running, n_imgs, t0 = 0.0, 0, time.time()
     for x, y in loader:
         x = x.to(device, non_blocking=True)
         target = _targets_for_loss(y, task, device)
         optimizer.zero_grad(set_to_none=True)
-        with torch.cuda.amp.autocast(enabled=use_amp):
+        with torch.amp.autocast(device_type, enabled=use_amp):
             logits = model(x)
             loss = criterion(logits, target)
         if use_amp:
@@ -87,7 +88,7 @@ def run_training(model, loaders, task, *, epochs=100, lr=1e-3, device="cuda",
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     milestones = [int(0.5 * epochs), int(0.75 * epochs)]
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.1)
-    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+    scaler = torch.amp.GradScaler("cuda" if "cuda" in str(device) else "cpu", enabled=use_amp)
 
     start_epoch = 0
     best_val_auc = -1.0

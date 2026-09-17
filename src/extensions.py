@@ -42,6 +42,63 @@ def per_class_table(dataset, y_true, y_score):
         ["cls", "label", "support", "auc", "ap", "precision", "recall", "f1"]]
 
 
+def per_class_table_from_preds(dataset, y_true, y_pred, y_score):
+    """Like ``per_class_table`` but precision/recall/F1 use a supplied
+    ``y_pred`` (e.g. from threshold tuning) instead of argmax over y_score."""
+    n = len(INFO[dataset]["label"])
+    rows = metricsmod.per_class_metrics(y_true, y_score, n, y_pred=y_pred)
+    names = _labels(dataset)
+    for r in rows:
+        r["label"] = names[r["cls"]]
+    return pd.DataFrame(rows)[
+        ["cls", "label", "support", "auc", "ap", "precision", "recall", "f1"]]
+
+
+def aggregate_from_table(table):
+    """Macro accuracy/F1-equivalent summary from a per-class table.
+
+    Accuracy is support-weighted recall (the standard "correct / total"
+    identity for a full partition), used here because the table only carries
+    per-class rows, not a global argmax vector.
+    """
+    total = table["support"].sum()
+    acc = float((table["support"] * table["recall"]).sum() / total) if total else float("nan")
+    return dict(macro_f1=float(table["f1"].mean()), macro_auc=float(table["auc"].mean()),
+               weighted_accuracy=acc,
+               min_class_f1=float(table["f1"].min()), min_class_recall=float(table["recall"].min()))
+
+
+def tune_thresholds(y_true, y_score, n_classes=None):
+    """Per-class decision thresholds maximizing one-vs-rest F1 on a held-out
+    split (validation), for the threshold-tuned baseline control: isolates
+    how much of a mitigation's equity gain is a decision-boundary shift vs.
+    a change in what the model learned."""
+    from sklearn.metrics import f1_score
+
+    y_true = np.asarray(y_true).squeeze()
+    y_score = np.asarray(y_score)
+    n_classes = n_classes or y_score.shape[1]
+    thresholds = np.full(n_classes, 0.5)
+    for c in range(n_classes):
+        y_bin = (y_true == c).astype(int)
+        best_t, best_f1 = 0.5, -1.0
+        for t in np.linspace(0.01, 0.99, 99):
+            f1 = f1_score(y_bin, (y_score[:, c] >= t).astype(int), zero_division=0)
+            if f1 > best_f1:
+                best_f1, best_t = f1, t
+        thresholds[c] = best_t
+    return thresholds
+
+
+def apply_thresholds(y_score, thresholds):
+    """Argmax of score/threshold ratio: the standard way to turn per-class
+    thresholds into a single-label decision when classes are mutually
+    exclusive (a class only "wins" once its margin over its own threshold is
+    largest among all classes)."""
+    y_score = np.asarray(y_score)
+    return (y_score / np.asarray(thresholds)[None, :]).argmax(axis=1)
+
+
 def per_class_multiseed(dataset, preds_by_seed):
     """Aggregate per-class metrics across seeds into mean±std.
 
@@ -278,14 +335,19 @@ def plot_comparison_bars(rows, out_path):
     return len(rows)
 
 
-def rare_vs_common_degradation(dataset, full_table, light_table, out_dir):
-    """Compare per-class F1 of full vs lightweight, ranked by class frequency."""
+def rare_vs_common_degradation(dataset, full_table, light_table, out_dir,
+                               stem="lightweight_degradation"):
+    """Compare per-class F1 of full vs lightweight, ranked by class frequency.
+
+    ``stem`` lets callers sweep multiple widths without overwriting each
+    other's CSV (e.g. ``lightweight_degradation_w0.75``).
+    """
     os.makedirs(out_dir, exist_ok=True)
     merged = full_table[["cls", "label", "support", "f1"]].rename(columns={"f1": "f1_full"})
     merged = merged.merge(light_table[["cls", "f1"]].rename(columns={"f1": "f1_light"}), on="cls")
     merged["f1_drop"] = merged["f1_full"] - merged["f1_light"]
     merged = merged.sort_values("support")
-    merged.to_csv(os.path.join(out_dir, "lightweight_degradation.csv"), index=False)
+    merged.to_csv(os.path.join(out_dir, f"{stem}.csv"), index=False)
     # Correlation of frequency vs degradation: negative -> rare classes hurt more.
     corr = float(np.corrcoef(merged["support"], merged["f1_drop"])[0, 1]) \
         if len(merged) > 2 else float("nan")
@@ -564,6 +626,87 @@ def frequency_performance(dataset, table, report_dir, stem="ext_freq_perf",
                 pearson_auc=pear_auc, png=png)
 
 
+def frequency_correlation_robustness(dataset, tables_by_model, report_dir,
+                                     leverage_class=None, n_boot=20000, seed=0,
+                                     stem="freq_correlation_robustness",
+                                     root=None, download=True):
+    """Pearson/Spearman r for frequency-vs-recall and frequency-vs-AUC, with
+    a bootstrap CI, a Fisher-z CI, and a leave-one-out check excluding the
+    single biggest leverage class (e.g. Melanocytic nevi at 67% of DermaMNIST
+    training data).
+
+    With only as many points as classes (n=7 for DermaMNIST), a bare point
+    estimate for r is not informative on its own -- reviewers flagged this.
+    ``tables_by_model`` maps a model name to its per-class table (as returned
+    by ``per_class_table``/``per_class_table_from_preds``).
+    """
+    from scipy.stats import pearsonr, spearmanr
+    from .data import class_counts
+
+    counts = class_counts(dataset, root=root, download=download).astype(float)
+    n = len(counts)
+    names = _labels(dataset)
+    if leverage_class is None:
+        leverage_idx = int(np.argmax(counts))
+    else:
+        leverage_idx = names.index(leverage_class)
+    keep = np.arange(n) != leverage_idx
+
+    rng = np.random.default_rng(seed)
+
+    def _bootstrap_ci(x, y):
+        vals = []
+        m = len(x)
+        for _ in range(n_boot):
+            idx = rng.integers(0, m, m)
+            xs, ys_ = x[idx], y[idx]
+            if len(set(xs)) < 2 or len(set(ys_)) < 2:
+                continue
+            vals.append(pearsonr(xs, ys_)[0])
+        vals.sort()
+        if not vals:
+            return float("nan"), float("nan")
+        lo = vals[int(0.025 * len(vals))]
+        hi = vals[min(int(0.975 * len(vals)), len(vals) - 1)]
+        return float(lo), float(hi)
+
+    def _fisher_ci(r, m):
+        r = np.clip(r, -0.999999, 0.999999)
+        z = 0.5 * np.log((1 + r) / (1 - r))
+        se = 1 / np.sqrt(m - 3)
+        return float(np.tanh(z - 1.96 * se)), float(np.tanh(z + 1.96 * se))
+
+    rows = []
+    for model_name, table in tables_by_model.items():
+        t = table.sort_values("cls")
+        recall_col = "recall_mean" if "recall_mean" in t else "recall"
+        auc_col = "auc_mean" if "auc_mean" in t else "auc"
+        rec = t[recall_col].values.astype(float)
+        auc = t[auc_col].values.astype(float)
+        for metric_name, vals in [("Recall", rec), ("AUC", auc)]:
+            r_p = float(pearsonr(counts, vals)[0])
+            r_s = float(spearmanr(counts, vals)[0])
+            ci_boot = _bootstrap_ci(counts, vals)
+            ci_fisher = _fisher_ci(r_p, n)
+            r_p_excl = float(pearsonr(counts[keep], vals[keep])[0])
+            r_s_excl = float(spearmanr(counts[keep], vals[keep])[0])
+            rows.append({
+                "Model": model_name, "Metric": metric_name,
+                f"Pearson r (n={n})": round(r_p, 3),
+                "Pearson 95% CI (Fisher)": f"[{ci_fisher[0]:+.3f}, {ci_fisher[1]:+.3f}]",
+                "Pearson 95% CI (bootstrap)": f"[{ci_boot[0]:+.3f}, {ci_boot[1]:+.3f}]",
+                f"Spearman rho (n={n})": round(r_s, 3),
+                f"Pearson r excl. {names[leverage_idx]} (n={n - 1})": round(r_p_excl, 3),
+                f"Spearman rho excl. {names[leverage_idx]} (n={n - 1})": round(r_s_excl, 3),
+            })
+
+    df = pd.DataFrame(rows)
+    path = os.path.join(report_dir, f"{stem}.csv")
+    os.makedirs(report_dir, exist_ok=True)
+    df.to_csv(path, index=False)
+    return df
+
+
 def plot_per_class_performance(dataset, table, report_dir,
                                stem="ext_per_class_perf",
                                root=None, download=True):
@@ -723,8 +866,19 @@ def robustness_eval(model, dataset, images, y_true, device="cuda",
     model = model.to(device).eval()
 
     def _auc_for(ys, mask_classes):
-        sub = np.isin(yt, mask_classes)
-        return metricsmod.getAUC(yt[sub], ys[sub], task) if sub.sum() else np.nan
+        # Average one-vs-rest AUC over the given classes' columns, each computed
+        # against the full test set. Filtering rows down to `mask_classes` first
+        # (the previous approach) leaves every excluded class with zero positive
+        # examples in that subset, which makes sklearn's roc_auc_score raise
+        # (or, depending on catch site, silently drop the row) — the source of
+        # the empty auc_common/auc_rare columns feeding the corruption figure.
+        from sklearn.metrics import roc_auc_score
+        aucs = []
+        for c in mask_classes:
+            yb = (yt == c).astype(float)
+            if 0 < yb.sum() < len(yb):
+                aucs.append(roc_auc_score(yb, ys[:, c]))
+        return float(np.mean(aucs)) if aucs else np.nan
 
     rows = []
     for kind in kinds:

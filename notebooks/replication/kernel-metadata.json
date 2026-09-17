@@ -1,0 +1,13 @@
+{
+  "id": "christopherhuang88/medmnist-v2-replication-extensions-single-seed",
+  "title": "MedMNIST v2 replication - extensions (single-seed)",
+  "code_file": "medmnist_replication.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": ["arashnic/standardized-biomedical-images-medmnist"],
+  "competition_sources": [],
+  "kernel_sources": []
+}

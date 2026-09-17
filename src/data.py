@@ -16,6 +16,11 @@ Key protocol points, faithful to MedMNIST v2 (2023):
 
 from __future__ import annotations
 
+import glob
+import hashlib
+import os
+import shutil
+
 import numpy as np
 import torch
 import torchvision.transforms as T
@@ -23,6 +28,54 @@ from PIL import Image
 
 import medmnist
 from medmnist import INFO
+from medmnist.dataset import DEFAULT_ROOT
+
+
+def _md5(path, chunk_size=1 << 20):
+    h = hashlib.md5()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(chunk_size), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _stage_from_mirror(dataset, root, size_flag=""):
+    """Copy a valid cached/mirrored ``.npz`` into place so ``medmnist`` never
+    has to touch Zenodo at all.
+
+    Zenodo (the package's only download host) has real outages -- retrying a
+    dead host just burns GPU time. If a same-named ``.npz`` already sits
+    anywhere under a Kaggle input mount (``/kaggle/input/**``) or in
+    ``MEDMNIST_MIRROR_DIRS`` (colon-separated), and its MD5 matches the
+    checksum ``medmnist`` itself would verify, stage it into ``root`` so the
+    integrity check in ``torchvision.datasets.utils.download_url`` short-
+    circuits before any network call. A non-matching or missing mirror is a
+    silent no-op -- the normal (possibly retried) download still runs.
+    """
+    info = INFO[dataset]
+    filename = f"{dataset}{size_flag}.npz"
+    dest = os.path.join(root, filename)
+    if os.path.exists(dest) and _md5(dest) == info[f"MD5{size_flag}"]:
+        return True  # already staged/cached correctly
+
+    search_dirs = ["/kaggle/input"] + [
+        d for d in os.environ.get("MEDMNIST_MIRROR_DIRS", "").split(":") if d
+    ]
+    candidates = []
+    for d in search_dirs:
+        candidates.extend(glob.glob(os.path.join(d, "**", filename), recursive=True))
+
+    for cand in candidates:
+        try:
+            if _md5(cand) == info[f"MD5{size_flag}"]:
+                os.makedirs(root, exist_ok=True)
+                shutil.copyfile(cand, dest)
+                print(f"[data] staged {dataset}{size_flag}.npz from mirror {cand} "
+                      "(MD5 verified) -- skipping Zenodo download")
+                return True
+        except OSError:
+            continue
+    return False
 
 
 def build_transform(size):
@@ -46,11 +99,18 @@ def get_info(dataset):
     return INFO[dataset]
 
 
-def get_dataset(dataset, split, size, root=None, download=True):
+def get_dataset(dataset, split, size, root=None, download=True,
+               download_retries=4, download_backoff_s=20):
     """Return a ``medmnist`` dataset object for ``split`` with our transform.
 
     Data is always loaded from the 28-pixel ``.npz``; ``size`` only controls the
     transform (the 224 pipeline resizes internally).
+
+    Zenodo (the ``medmnist`` package's download host) intermittently returns
+    504s on an otherwise-fine connection; the package itself doesn't retry, so
+    a single blip kills an otherwise-healthy training run. Retry the whole
+    construction (which re-attempts the download if the .npz still isn't
+    cached) with backoff before giving up.
     """
     info = INFO[dataset]
     DataClass = getattr(medmnist, info["python_class"])
@@ -59,7 +119,23 @@ def get_dataset(dataset, split, size, root=None, download=True):
                   as_rgb=True, size=28)
     if root is not None:
         kwargs["root"] = root
-    return DataClass(**kwargs)
+
+    if download:
+        _stage_from_mirror(dataset, root or DEFAULT_ROOT)
+
+    last_err = None
+    for attempt in range(download_retries):
+        try:
+            return DataClass(**kwargs)
+        except RuntimeError as e:
+            last_err = e
+            if attempt < download_retries - 1:
+                import time
+                wait = download_backoff_s * (attempt + 1)
+                print(f"[data] {dataset} download failed (attempt {attempt + 1}/"
+                      f"{download_retries}), retrying in {wait}s: {e}")
+                time.sleep(wait)
+    raise last_err
 
 
 def get_loaders(dataset, size, batch_size=128, root=None, download=True,

@@ -80,13 +80,22 @@ def _versions():
         numpy=np.__version__,
         sklearn=sklearn.__version__,
         cuda=torch.version.cuda,
-        gpu=torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu",
+        gpu=torch.cuda.get_device_name(0) if torch.cuda.is_available()
+            else ("mps" if torch.backends.mps.is_available() else "cpu"),
     )
+
+
+def _select_device():
+    if torch.cuda.is_available():
+        return "cuda"
+    if torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
 
 
 def run_config(cfg: RunConfig, log_fn=print, verify_metrics=True):
     """Execute one run end-to-end and write artifacts. Returns a result dict."""
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = _select_device()
     info = datamod.get_info(cfg.dataset)
     task = info["task"]
     n_classes = len(info["label"])
@@ -189,7 +198,7 @@ SMALL_MEDIUM_DATASETS = (
 LARGE_DATASETS = ("tissuemnist", "octmnist", "pathmnist", "chestmnist")
 
 
-def run_matrix(seeds=(0, 1, 2)):
+def run_matrix(seeds=(0, 1, 2), octmnist_second_seed=False):
     """Return the tiered list of ``(tier, dataset, model, size, seed)`` tuples.
 
     This is the compute-minimal slice of MedMNIST v2 Table 3 the replication
@@ -200,6 +209,12 @@ def run_matrix(seeds=(0, 1, 2)):
     * **Tier 2** — the small/medium datasets at ResNet-18 @ 28, all ``seeds``.
     * **Tier 3** — the four large datasets at ResNet-18 @ 28, **seed 0 only**
       (single-seed for compute reasons; stable at that data scale).
+
+    ``octmnist_second_seed=True`` adds a ``seed 1`` OCTMNIST run: it's Tier
+    3's only tolerance miss (delta accuracy = -0.048), so a single seed
+    can't distinguish a systematic gap from single-seed noise. Left off by
+    default (~2.15 GPU-hours on a P100, based on the seed-0 run's recorded
+    wall-clock) -- enable it explicitly once GPU budget allows.
     """
     matrix = []
     # Tier 1: DermaMNIST, all 4 model x size, all seeds.
@@ -211,9 +226,12 @@ def run_matrix(seeds=(0, 1, 2)):
     for dataset in SMALL_MEDIUM_DATASETS:
         for s in seeds:
             matrix.append((2, dataset, "resnet18", 28, s))
-    # Tier 3: large datasets, ResNet-18 @ 28, single seed (seed 0).
+    # Tier 3: large datasets, ResNet-18 @ 28, single seed (seed 0), except
+    # OCTMNIST's opt-in second seed (see docstring).
     for dataset in LARGE_DATASETS:
         matrix.append((3, dataset, "resnet18", 28, 0))
+        if dataset == "octmnist" and octmnist_second_seed:
+            matrix.append((3, dataset, "resnet18", 28, 1))
     return matrix
 
 

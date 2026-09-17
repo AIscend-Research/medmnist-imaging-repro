@@ -1,0 +1,9 @@
+Model,Metric,Pearson r (n=7),Pearson 95% CI (Fisher),Pearson 95% CI (bootstrap),Spearman rho (n=7),Pearson r excl. melanocytic nevi (n=6),Spearman rho excl. melanocytic nevi (n=6)
+Baseline,Recall,0.782,"[+0.072, +0.966]","[-0.852, +0.974]",0.393,0.008,0.029
+Baseline,AUC,-0.291,"[-0.856, +0.592]","[-0.984, +0.170]",-0.643,-0.864,-0.6
+Weighted Sampler,Recall,0.784,"[+0.076, +0.966]","[-0.771, +0.993]",0.429,-0.097,0.086
+Weighted Sampler,AUC,-0.273,"[-0.851, +0.604]","[-0.998, +0.114]",-0.714,-0.94,-0.714
+Weighted Loss,Recall,0.398,"[-0.507, +0.886]","[-0.670, +0.987]",0.286,-0.262,0.143
+Weighted Loss,AUC,-0.186,"[-0.824, +0.659]","[-0.997, +0.328]",-0.429,-0.816,-0.6
+Lightweight (0.5x),Recall,0.812,"[+0.151, +0.971]","[-0.488, +0.986]",0.571,0.211,0.314
+Lightweight (0.5x),AUC,-0.211,"[-0.832, +0.644]","[-0.995, +0.488]",-0.464,-0.693,-0.657

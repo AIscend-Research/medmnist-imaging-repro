@@ -20,10 +20,11 @@ def predict(model, loader, task, device, use_amp=False):
     multi-label -- matching what ``medmnist.Evaluator`` expects.
     """
     model.eval()
+    device_type = "cuda" if "cuda" in str(device) else "cpu"
     scores, trues = [], []
     for x, y in loader:
         x = x.to(device, non_blocking=True)
-        with torch.cuda.amp.autocast(enabled=use_amp):
+        with torch.amp.autocast(device_type, enabled=use_amp):
             logits = model(x)
         logits = logits.float()
         if task == "multi-label, binary-class":
